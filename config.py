@@ -356,10 +356,10 @@ PYTORCH_CUDA_ALLOC_CONF = "expandable_segments:True"
 # =====================================================
 LLM_MODEL = "TINYBERT"
 LLM_LAYERS = 2
-D_MODEL = 16
+D_MODEL = 32
 D_FF = 128
-GRADIENT_CHECKPOINTING = True
-USE_AMP = True
+GRADIENT_CHECKPOINTING = 1
+USE_AMP = 1
 WARMUP_STEPS = 500
 # =====================================================
 # Training
