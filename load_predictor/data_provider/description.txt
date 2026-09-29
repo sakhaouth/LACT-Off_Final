@@ -1,0 +1,9 @@
+**data_factory.py
+*data_provider -> 
+set the hyper params for testing or eval
+retrun data set and loader
+Dataset defines what the data is and how to access a single sample, while DataLoader defines how that data is efficiently batched, shuffled, and fed to the model during training.
+**data_loader.py
+Setting hyper params for the dataser
+scalling data
+Formalize different dataset

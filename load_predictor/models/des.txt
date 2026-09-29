@@ -1,0 +1,7 @@
+*Model
+setting different LLM models and tokenizer
+156 -> Padding is necessary when batching sequences of different lengths, so all sequences in a batch have the same length.
+
+The model ignores padding tokens during attention or loss calculation.
+
+
