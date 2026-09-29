@@ -16,7 +16,7 @@ TIER_18 = 2
 TIER_30 = 3
 SERVER_COUNT = [6, 12, 18, 30]
 
-CURRENT_TOPOLOGY = TIER_6
+CURRENT_TOPOLOGY = TIER_12
 NUM_SERVERS = SERVER_COUNT[CURRENT_TOPOLOGY]
 PREDICTOR_DATA_SLOT = (21*24*60)//15
 PREDICTOR_TRAINING_END = (14*24*60)//15
@@ -260,8 +260,8 @@ VIOLATION_PENALTY = {"HIGH": 6.0, "MID": 2.0, "LOW": 0.5}
 # Per-queue-type sampling ranges for new tasks (cpu cycles, memory, bytes,
 # time-tolerance in slot units). ASSUMPTION: higher urgency -> tighter
 # tolerance, similar resource needs across urgency levels.
-TASK_CPU_RANGE = {LOW: (5, 40), MID: (5, 40), HIGH: (5, 40)}
-TASK_MEM_RANGE = {LOW: (5, 40), MID: (5, 40), HIGH: (5, 40)}
+TASK_CPU_RANGE = {LOW: (5e9, 40e9), MID: (5e9, 40e9), HIGH: (5e9, 40e9)}
+TASK_MEM_RANGE = {LOW: (5e6, 40e6), MID: (5e6, 40e6), HIGH: (5e6, 40e6)}
 TASK_SIZE_RANGE = {LOW: (1e5, 5e5), MID: (1e5, 5e5), HIGH: (1e5, 5e5)}
 TASK_TOLERANCE_RANGE = {LOW: (6.0, 20.0), MID: (2.0, 6.0), HIGH: (0.5, 2.0)}
 
@@ -386,7 +386,7 @@ SEASONAL_PATTERNS = "every 1 minute"
 # Forecasting
 # =====================================================
 TASK_NAME = "long_term_forecast"
-MODEL_ID = "ETTh1_512_96"
+MODEL_ID = "S_LOAD_16_1"
 SEQ_LEN = 16
 LABEL_LEN = 8
 PRED_LEN = 1
@@ -394,9 +394,9 @@ PRED_LEN = 1
 # =====================================================
 # Network
 # =====================================================
-ENC_IN = 7
-DEC_IN = 7
-C_OUT = 7
+ENC_IN = 12
+DEC_IN = 12
+C_OUT = 12
 FACTOR = 3
 
 # =====================================================
@@ -411,7 +411,7 @@ N_HEADS = 8
 PATCh_LEN = 16
 STRIDE = 8
 DROP_OUT = 0.1
-LLM_DIM = 128
+LLM_DIM = 768
 FACTOR = 3
 PROMT_DOMAIN = 0
 CONTENT = ""
