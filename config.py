@@ -310,8 +310,8 @@ LOAD_NORM_CLIP = 5.0
 SLOT_DURATION_S = 900.0 #15 minuteC
 
 SEQ_LEN = 16
-ROLLOUT_LEN = 1000  # "T" in Algorithm 2 / rollout length for either trainer
-NUM_ITERATIONS = 200
+ROLLOUT_LEN = 480  # "T" in Algorithm 2 / rollout length for either trainer
+NUM_ITERATIONS = 100
 # =============================================================================
 # VARIANT A -- Algorithm 2: Multi-Task A2C with Shared Critic
 # (ALLOCATION / MIGRATION / SHARING actor-critics; from the first draft)
