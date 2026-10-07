@@ -236,6 +236,7 @@ class BaseStation:
         for task in queue.tasks:
             if total_exc_time >= cfg.SLOT_DURATION_S:
                 break  # slot time budget exhausted; remaining tasks wait for next slot
+            # print(f"Task cpu- {task.cpu_cycles}, Task mem-{task.memory}")
             if task.cpu_cycles <= remaining_cpu and task.memory <= remaining_mem:
                 exec_time = task.cpu_cycles / max(cpu_budget, 1e-9) * cfg.SLOT_DURATION_S
                 task.exec_time = exec_time

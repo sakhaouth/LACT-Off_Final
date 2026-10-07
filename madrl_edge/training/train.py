@@ -22,26 +22,26 @@ import time
 
 # from utils import losses
 
-def collect_predictor_dataset(num_slots):
-    print(f"[Predictor] collecting {num_slots} slots of load data for pretraining")
-    env = MultiAgentEdgeEnv(vrnn_encoder=None, training= True)
-    columns = ["date","low_cpu","low_mem","low_num","low_ttl","mid_cpu","mid_mem","mid_num","mid_ttl","high_cpu","high_mem","high_num","high_ttl"]
-    dataset = [pd.DataFrame(columns=columns) for _ in range(len(env.stations))]
-    interval = 15 #minutes
+# def collect_predictor_dataset(num_slots):
+#     print(f"[Predictor] collecting {num_slots} slots of load data for pretraining")
+#     env = MultiAgentEdgeEnv(vrnn_encoder=None, training= True)
+#     columns = ["date","low_cpu","low_mem","low_num","low_ttl","mid_cpu","mid_mem","mid_num","mid_ttl","high_cpu","high_mem","high_num","high_ttl"]
+#     dataset = [pd.DataFrame(columns=columns) for _ in range(len(env.stations))]
+#     interval = 15 #minutes
 
-    start_date_time = datetime.now()
-    for slot in range(num_slots):
-        for s in env.stations:
-            row = [start_date_time.strftime("%Y-%m-%d %H:%M:%S")]
-            for t in generate_slot_arrivals(s.id, slot):
-                s.add_task(t)
-            row.extend(s.local_load_vector())
-            dataset[s.id].loc[len(dataset[s.id])] = row
-        start_date_time += timedelta(minutes=interval)
+#     start_date_time = datetime.now()
+#     for slot in range(num_slots):
+#         for s in env.stations:
+#             row = [start_date_time.strftime("%Y-%m-%d %H:%M:%S")]
+#             for t in generate_slot_arrivals(s.id, slot):
+#                 s.add_task(t)
+#             row.extend(s.local_load_vector())
+#             dataset[s.id].loc[len(dataset[s.id])] = row
+#         start_date_time += timedelta(minutes=interval)
     
-    for s in env.stations:
-        dataset[s.id].to_csv(cfg.LOAD_DIR / f"[{cfg.TOPO_NAME[cfg.CURRENT_TOPOLOGY]}]raw_load_for_bs_{s.id}.csv", index= False)
-    print("Saved all the dataset")
+#     for s in env.stations:
+#         dataset[s.id].to_csv(cfg.LOAD_DIR / f"[{cfg.TOPO_NAME[cfg.CURRENT_TOPOLOGY]}]raw_load_for_bs_{s.id}.csv", index= False)
+#     print("Saved all the dataset")
     
      
             
@@ -77,67 +77,67 @@ def collect_predictor_dataset(num_slots):
 #     print(f"[VRNN] collected {len(sequences)} sequences of shape {sequences.shape}")
 #     return sequences
 
-def collect_vrnn_dataset(num_slots=10080):
-    """Run a VRNN-free env forward with random traffic to harvest load
-    sequences for VRNN pretraining. CONFUSION: ideally the VRNN should be
-    pretrained on load distributions representative of the FINAL trained
-    policy's behaviour, but that's circular (policy doesn't exist yet). Using
-    random/heuristic traffic as a bootstrap, matching what you described
-    ("train the VRNN by the generated aggregated load" before MADDPG).
+# def collect_vrnn_dataset(num_slots=10080):
+#     """Run a VRNN-free env forward with random traffic to harvest load
+#     sequences for VRNN pretraining. CONFUSION: ideally the VRNN should be
+#     pretrained on load distributions representative of the FINAL trained
+#     policy's behaviour, but that's circular (policy doesn't exist yet). Using
+#     random/heuristic traffic as a bootstrap, matching what you described
+#     ("train the VRNN by the generated aggregated load" before MADDPG).
 
-    Returns (history_dataset, next_dataset) matching train_vrnn's expected
-    shapes: history_dataset is (N, VRNN_SEQ_LEN, D) -- 16 known steps -- and
-    next_dataset is (N, D) -- the TRUE 17th step immediately following each
-    16-step window. These come from one continuous slid window of length
-    VRNN_SEQ_LEN + 1 so the label is always the real next slot, not just
-    another window start.
-    """
+#     Returns (history_dataset, next_dataset) matching train_vrnn's expected
+#     shapes: history_dataset is (N, VRNN_SEQ_LEN, D) -- 16 known steps -- and
+#     next_dataset is (N, D) -- the TRUE 17th step immediately following each
+#     16-step window. These come from one continuous slid window of length
+#     VRNN_SEQ_LEN + 1 so the label is always the real next slot, not just
+#     another window start.
+#     """
 
-    print(f"[VRNN] collecting {num_slots} slots of load data for pretraining")
-    env = MultiAgentEdgeEnv(vrnn_encoder=None, training= True)
-    dataset = []
-    for slot in range(num_slots):
-        for s in env.stations:
-            for t in generate_slot_arrivals(s.id, slot):
-                s.add_task(t)
-        loads = []
-        for s in env.stations:
-            loads.extend(s.local_load_vector())
-        dataset.append(np.array(loads, dtype=np.float32))
-        # cheap random allocation/migration just to keep queues moving
-        # dummy_actions = [np.concatenate([
-        #     np.array([1/3, 1/3, 1/3, 1/3, 1/3, 1/3]),
-        #     np.zeros(6),
-        # ]) for _ in env.stations]
-        # env.step(dummy_actions)
+#     print(f"[VRNN] collecting {num_slots} slots of load data for pretraining")
+#     env = MultiAgentEdgeEnv(vrnn_encoder=None, training= True)
+#     dataset = []
+#     for slot in range(num_slots):
+#         for s in env.stations:
+#             for t in generate_slot_arrivals(s.id, slot):
+#                 s.add_task(t)
+#         loads = []
+#         for s in env.stations:
+#             loads.extend(s.local_load_vector())
+#         dataset.append(np.array(loads, dtype=np.float32))
+#         # cheap random allocation/migration just to keep queues moving
+#         # dummy_actions = [np.concatenate([
+#         #     np.array([1/3, 1/3, 1/3, 1/3, 1/3, 1/3]),
+#         #     np.zeros(6),
+#         # ]) for _ in env.stations]
+#         # env.step(dummy_actions)
 
-    window_len = cfg.VRNN_SEQ_LEN + 1  # 16 history steps + 1 true next-step label
-    if len(dataset) < window_len:
-        raise ValueError(
-            f"[VRNN] collected only {len(dataset)} slots, need at least "
-            f"{window_len} (VRNN_SEQ_LEN + 1) to form a single training sample."
-        )
+#     window_len = cfg.VRNN_SEQ_LEN + 1  # 16 history steps + 1 true next-step label
+#     if len(dataset) < window_len:
+#         raise ValueError(
+#             f"[VRNN] collected only {len(dataset)} slots, need at least "
+#             f"{window_len} (VRNN_SEQ_LEN + 1) to form a single training sample."
+#         )
 
-    windows = np.array(
-        [dataset[i:i + window_len] for i in range(len(dataset) - window_len + 1)],
-        dtype=np.float32,
-    )  # (N, 17, D)
+#     windows = np.array(
+#         [dataset[i:i + window_len] for i in range(len(dataset) - window_len + 1)],
+#         dtype=np.float32,
+#     )  # (N, 17, D)
 
-    history_dataset = windows[:, :cfg.VRNN_SEQ_LEN, :]  # (N, 16, D)
-    next_dataset = windows[:, cfg.VRNN_SEQ_LEN, :]       # (N, D) -- true 17th step
+#     history_dataset = windows[:, :cfg.VRNN_SEQ_LEN, :]  # (N, 16, D)
+#     next_dataset = windows[:, cfg.VRNN_SEQ_LEN, :]       # (N, D) -- true 17th step
 
-    print(f"[VRNN] collected {len(history_dataset)} samples: "
-          f"history {history_dataset.shape}, next {next_dataset.shape}")
-    return history_dataset, next_dataset
+#     print(f"[VRNN] collected {len(history_dataset)} samples: "
+#           f"history {history_dataset.shape}, next {next_dataset.shape}")
+#     return history_dataset, next_dataset
 
 
 def run_training(episodes=500, slot_per_episode=10080,
                   vrnn_checkpoint="vrnn.pt", pretrain_vrnn=False, device=cfg.DEVICE):
-    if pretrain_vrnn:
-        dataset, target = collect_vrnn_dataset(num_slots=cfg.ROLLOUT_LEN)
-        print(f"Collected VRNN dataset of shape: {np.array(dataset).shape}")
-        train_vrnn(dataset,target, epochs=100, save_path=vrnn_checkpoint)
-        return
+    # if pretrain_vrnn:
+    #     dataset, target = collect_vrnn_dataset(num_slots=cfg.ROLLOUT_LEN)
+    #     print(f"Collected VRNN dataset of shape: {np.array(dataset).shape}")
+    #     train_vrnn(dataset,target, epochs=100, save_path=vrnn_checkpoint)
+    #     return
     
 
     
@@ -217,7 +217,7 @@ def run_training(episodes=500, slot_per_episode=10080,
 
         row = [ep + 1]
         for i in range(cfg.NUM_SERVERS):
-            row.append(ep_reward[i])
+            row.append(ep_reward[i]/slot_per_episode)
             row.append(ep_actor_loss[i])
             row.append(ep_critic_loss[i])
             row.append(ep_total_success[i])
@@ -227,7 +227,7 @@ def run_training(episodes=500, slot_per_episode=10080,
         maddpg_training_dataframe.loc[len(maddpg_training_dataframe)] = row
         if ep % 10 == 0:
             avg_completion = np.mean([info["completion_rate"] for info in info_n])
-            print(f"[ep {ep}] mean_reward={ep_reward.mean():.3f} "
+            print(f"[ep {ep}] mean_reward={(ep_reward.mean()/slot_per_episode):.3f} "
                   f"completion_rate={avg_completion:.3f}")
         end_ex = time.perf_counter()
         run_time = end_ex - start

@@ -47,7 +47,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from torch.utils.data import TensorDataset, DataLoader
-
+import os
 from madrl_edge import config
 
 from pandas import DataFrame
@@ -200,8 +200,12 @@ class FrozenVRNNEncoder:
 
     def __init__(self, checkpoint_path: str, device="cpu"):
         self.device = device
+        model_path = os.path.join(
+                cfg.MODEL_DIR,
+                f"[{cfg.TOPO_NAME[cfg.CURRENT_TOPOLOGY]}]vrnn.pth"
+            )
         self.model = VRNN().to(device)
-        state = torch.load(checkpoint_path, map_location=device)
+        state = torch.load(model_path, map_location=device)
         self.model.load_state_dict(state)
         self.model.eval()
         for p in self.model.parameters():
@@ -357,6 +361,6 @@ def train_vrnn(history_dataset, next_dataset, epochs=50, lr=1e-3, device="cpu", 
         print(f"[VRNN] epoch {epoch+1}/{epochs} loss={total_loss:.4f}")
 
     vrnn_dataframe.to_csv(cfg.RESULT_DIR / f"vrnn_{cfg.TOPO_NAME[cfg.CURRENT_TOPOLOGY]}_training_log.csv", index=False)
-    torch.save(model.state_dict(), save_path)
+    torch.save(model.state_dict(), os.path.join(save_path, f"[{cfg.TOPO_NAME[cfg.CURRENT_TOPOLOGY]}]vrnn.pth"))
     print(f"[VRNN] saved frozen checkpoint to {save_path}")
     return save_path
