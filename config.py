@@ -54,7 +54,7 @@ TOPO_NAME = {
     TIER_30 : "TIER_30",
 }
 
-CURRENT_RUNNIG_MODE = LACT_Off
+CURRENT_RUNNIG_MODE = MINUS_PDMA
 TASK_DIR = ROOT_DIR / "tasks_producer" / TOPO_NAME[CURRENT_TOPOLOGY]
 LOAD_DIR = ROOT_DIR / "load_files"
 LINK_LATENCY_S = 0.005
@@ -260,8 +260,8 @@ VIOLATION_PENALTY = {"HIGH": 6.0, "MID": 2.0, "LOW": 0.5}
 # Per-queue-type sampling ranges for new tasks (cpu cycles, memory, bytes,
 # time-tolerance in slot units). ASSUMPTION: higher urgency -> tighter
 # tolerance, similar resource needs across urgency levels.
-TASK_CPU_RANGE = {LOW: (5e9, 40e9), MID: (5e9, 40e9), HIGH: (5e9, 40e9)}
-TASK_MEM_RANGE = {LOW: (5e6, 40e6), MID: (5e6, 40e6), HIGH: (5e6, 40e6)}
+TASK_CPU_RANGE = {LOW: (5e6, 40e6), MID: (5e6, 40e6), HIGH: (5e6, 40e6)}
+TASK_MEM_RANGE = {LOW: (5, 40), MID: (5, 40), HIGH: (5, 40)}
 TASK_SIZE_RANGE = {LOW: (1e5, 5e5), MID: (1e5, 5e5), HIGH: (1e5, 5e5)}
 TASK_TOLERANCE_RANGE = {LOW: (6.0, 20.0), MID: (2.0, 6.0), HIGH: (0.5, 2.0)}
 
@@ -311,7 +311,7 @@ SLOT_DURATION_S = 900.0 #15 minuteC
 
 SEQ_LEN = 16
 ROLLOUT_LEN = 480  # "T" in Algorithm 2 / rollout length for either trainer
-NUM_ITERATIONS = 100
+NUM_ITERATIONS = 200
 # =============================================================================
 # VARIANT A -- Algorithm 2: Multi-Task A2C with Shared Critic
 # (ALLOCATION / MIGRATION / SHARING actor-critics; from the first draft)
